@@ -65,11 +65,12 @@ int main(){
 		key_datum.dsize = strlen(key_to_use);
 		data_datum.dptr = (void*)&items_to_store[i];
 		data_datum.dsize = sizeof(struct test_data);
-
-		fprintf(stdout,"%s %s %d\n",
-			items_to_store[i].misc_chars,
-			items_to_store[i].more_chars,
-			items_to_store[i].any_integer);
+		
+		//打印存储的数据
+		//fprintf(stdout,"%s %s %d\n",
+		//	items_to_store[i].misc_chars,
+		//	items_to_store[i].more_chars,
+		//	items_to_store[i].any_integer);
 		result = dbm_store(dbm_ptr,key_datum,data_datum,DBM_REPLACE);
 		if(result !=0){
 			fprintf(stderr,"dbm_store failed on key %s\n",key_to_use);
@@ -79,27 +80,49 @@ int main(){
 
 	while(1){
 
-	printf("Now input your key for retrieve data from dbm:\n");
-	scanf("%s",key_to_use);
-	//sprintf(key_to_use,"bu%d",13);
-	key_datum.dptr = key_to_use;
-	key_datum.dsize = strlen(key_to_use);
+		printf("Now input your key for retrieve data from dbm:\n");
+		scanf("%s",key_to_use);
 
-	data_datum = dbm_fetch(dbm_ptr,key_datum);
-	if(data_datum.dptr){//检索成功
-		printf("Data retrieved\n");
-		//将数据复制出来
-		memcpy(&item_retrieved,data_datum.dptr,data_datum.dsize);
-		//打印
-		printf("Retrieved item - %s %d %s\n",
-			item_retrieved.misc_chars,
-			item_retrieved.any_integer,
-			item_retrieved.more_chars);
-	}else{
-		//未找到
-		printf("No data found for key %s\n",key_to_use);
-	}
-	
+		if(0==strcmp(key_to_use,"print"))
+		{
+			printf("Print all datas in dbm\n");
+			for(key_datum=dbm_firstkey(dbm_ptr);key_datum.dptr;key_datum=dbm_nextkey(dbm_ptr))
+			{
+				data_datum = dbm_fetch(dbm_ptr,key_datum);		
+				if(data_datum.dptr)
+				{//检索成功
+					//将数据复制出来
+					memcpy(&item_retrieved,data_datum.dptr,data_datum.dsize);
+					//打印
+					printf("Retrieved item - %s %s %d\n",
+						item_retrieved.misc_chars,
+						item_retrieved.more_chars,
+						item_retrieved.any_integer);
+				}
+			}
+		}
+		else
+		{
+		
+		//sprintf(key_to_use,"bu%d",13);
+		key_datum.dptr = key_to_use;
+		key_datum.dsize = strlen(key_to_use);
+
+		data_datum = dbm_fetch(dbm_ptr,key_datum);
+		if(data_datum.dptr){//检索成功
+			printf("Data retrieved\n");
+			//将数据复制出来
+			memcpy(&item_retrieved,data_datum.dptr,data_datum.dsize);
+			//打印
+			printf("Retrieved item - %s %s %d\n",
+				item_retrieved.misc_chars,
+				item_retrieved.more_chars,
+				item_retrieved.any_integer);
+		}else{
+			//未找到
+			printf("No data found for key %s\n",key_to_use);
+		}
+		}
 	}
 	dbm_close(dbm_ptr);
 	exit(EXIT_SUCCESS);
